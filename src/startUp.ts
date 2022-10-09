@@ -1,13 +1,20 @@
+import "reflect-metadata"
+import { container } from "tsyringe"
 import express, { Application, request, Request, Response } from "express"
 import Database from "./infra/db";
-import NewsController from "./controller/newsController";
-import VideosController from "./controller/videosController";
-import GaleriaController from "./controller/galeriaController";
+import { NewsController } from "./controller/newsController";
+import { VideosController } from "./controller/videosController";
+import { GaleriaController } from "./controller/galeriaController";
+import "./shared/container"
 
 class StartUp {
   public app: Application
   private _db: Database = new Database()
-
+  /* Dependecy Injection */
+  private news = container.resolve(NewsController)
+  private videos = container.resolve(VideosController)
+  private galeria = container.resolve(GaleriaController)
+  
   constructor() {
     this.app = express()
     this._db.createConnection()
@@ -20,29 +27,29 @@ class StartUp {
 
     /* News Route */
     this.app.route("/api/v1/news/:page/:qtd").get((req: Request, res: Response) => {
-      return NewsController.get(req, res)
+      return this.news.get(req, res)
     })
 
     this.app.route("/api/v1/news/:id").get((req: Request, res: Response) => {
-      return NewsController.getById(req, res)
+      return this.news.getById(req, res)
     })
 
     /* Videos Route */
     this.app.route("/api/v1/videos/:page/:qtd").get((req: Request, res: Response) => {
-      return VideosController.get(req, res)
+      return this.videos.get(req, res)
     })
 
     this.app.route("/api/v1/videos/:id").get((req: Request, res: Response) => {
-      return VideosController.getById(req, res)
+      return this.videos.getById(req, res)
     })
 
     /* Galeria Route */
     this.app.route("/api/v1/galeria/:page/:qtd").get((req: Request, res: Response) => {
-      return GaleriaController.get(req, res)
+      return this.galeria.get(req, res)
     })
 
     this.app.route("/api/v1/galeria/:id").get((req: Request, res: Response) => {
-      return GaleriaController.getById(req, res)
+      return this.galeria.getById(req, res)
     })
   }
 }
